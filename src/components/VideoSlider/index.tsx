@@ -2,7 +2,7 @@
 
 import {useKeenSlider} from 'keen-slider/react';
 import {useCallback, useEffect, useMemo, useState, memo} from 'react';
-import {default as mockVideoList} from '@/data.ts';
+import videoDataList from '@/data.ts';
 import VideoPlayer, {SourceType} from '@/components/VideoPlayer';
 import NextPreviewer from '@/components/NextPreviewer';
 import countdownStore from '@/store/countdownStore.ts';
@@ -22,7 +22,7 @@ function VideoSlider() {
         },
     );
     const {startCountdown, resetCountdown, stopCountdown, setIsShow} = countdownStore(state => state);
-    const [videoList] = useState<SourceType[]>([...mockVideoList]);
+    const [videoList] = useState<SourceType[]>([...videoDataList]);
     const [isBrowserFocus, setIsBrowserFocus] = useState(true);
     const countRef = countdownStore(state => state.countRef);
 

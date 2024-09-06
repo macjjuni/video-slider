@@ -1,6 +1,6 @@
 import {create} from 'zustand';
 import Countdown from 'react-countdown';
-import {CountdownRefType} from '../page/countdown.tsx';
+import {CountdownRefType} from '@/components/Countdown';
 
 interface CountStoreType {
     countRef: CountdownRefType;

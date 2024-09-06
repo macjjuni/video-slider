@@ -1,4 +1,4 @@
-const videoList = [
+const videoDataList = [
     {
         src: 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
         type: 'video/mp4',
@@ -54,4 +54,4 @@ const videoList = [
     },
 ];
 
-export default videoList;
+export default videoDataList;
