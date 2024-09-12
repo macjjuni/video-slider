@@ -4,8 +4,9 @@ import {useKeenSlider} from 'keen-slider/react';
 import {useCallback, useEffect, useMemo, useState, memo} from 'react';
 import videoDataList from '@/data.ts';
 import VideoPlayer, {SourceType} from '@/components/VideoPlayer';
-import NextPreviewer from '@/components/NextPreviewer';
+import NextPreviewer from '@/components/NextPreviewer/NextPreviewer.tsx';
 import countdownStore from '@/store/countdownStore.ts';
+import "./VideoSlider.scss";
 import 'keen-slider/keen-slider.min.css';
 
 
