@@ -1,9 +1,8 @@
+'use client';
+
 import Countdown, {CountdownApi} from 'react-countdown';
 import {memo, useCallback, useEffect, useRef} from 'react';
-import countdownStore from '@/store/countdownStroe';
-import './NextPreviewer.scss';
-
-export type CountdownRefType = Countdown | null;
+import {countdownStore} from '@/store';
 
 
 function NextPreviewer({nextAction}: { nextAction: () => void }) {

@@ -1,0 +1,23 @@
+
+.video__slider__wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+
+    .slider__wrapper {
+        position: relative;
+        width: 500px;
+        height: 281px;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .slider-control__wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 16px;
+        margin-top: 24px;
+    }
+}

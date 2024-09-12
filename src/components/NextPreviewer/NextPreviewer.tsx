@@ -1,25 +1,23 @@
+'use client';
+
 import Countdown from 'react-countdown';
 import {memo, useCallback, useEffect, useRef} from 'react';
 import {countdownStore} from '../../store';
-import './index.css';
+import './NextPreviewer.scss';
 
-export type CountdownRefType = Countdown | null;
 
 interface NextPreviewerProps {
     nextAction: () => void;
 }
 
 
-function Index({nextAction}: NextPreviewerProps) {
+function NextPreviewer({nextAction}: NextPreviewerProps) {
 
     // region [Hooks]
 
     const countContainerRef = useRef<HTMLDivElement | null>(null);
-    const countdownRef = useRef<CountdownRefType>(null);
     const initializeCountdown = countdownStore(state => state.initializeCountdown);
     const resetCountdown = countdownStore(state => state.resetCountdown);
-
-
     const countSec = countdownStore(state => state.countSec);
     const isShow = countdownStore(state => state.isShow);
     const setIsShow = countdownStore(state => state.setIsShow);
@@ -72,14 +70,6 @@ function Index({nextAction}: NextPreviewerProps) {
     // region [Life Cycles]
 
     useEffect(() => {
-        // initialize
-        if (!countdownRef?.current) {
-            throw Error('Invalid countdownRef');
-        }
-        initializeCountdown(countdownRef!.current as Countdown);
-    }, []);
-
-    useEffect(() => {
         if (isShow) {
             onContainerShow();
         } else {
@@ -98,7 +88,9 @@ function Index({nextAction}: NextPreviewerProps) {
         <div ref={countContainerRef} className={`next-previewer__wrapper`}>
             <div className={'next-previewer__wrapper__countdown'}>
                 <Countdown
-                    ref={countdownRef}
+                    ref={(api) => {
+                        initializeCountdown(api as Countdown);
+                    }}
                     date={Date.now() + countSec * 1000}
                     autoStart={false}
                     renderer={renderer}
@@ -115,4 +107,4 @@ function Index({nextAction}: NextPreviewerProps) {
     );
 }
 
-export default memo(Index);
+export default memo(NextPreviewer);

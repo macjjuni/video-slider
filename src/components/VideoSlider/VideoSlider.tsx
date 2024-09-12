@@ -3,10 +3,11 @@
 import {useKeenSlider} from 'keen-slider/react';
 import {useCallback, useEffect, useMemo, useState, memo} from 'react';
 import videoDataList from '@/data.ts';
-import VideoPlayer, {SourceType} from '@/components/VideoPlayer';
+import {VideoPlayer} from '@/components/index.ts';
+import type {SourceType} from '@/components/VideoPlayer/VideoPlayer.tsx';
 import NextPreviewer from '@/components/NextPreviewer/NextPreviewer.tsx';
 import countdownStore from '@/store/countdownStore.ts';
-import "./VideoSlider.scss";
+import './VideoSlider.scss';
 import 'keen-slider/keen-slider.min.css';
 
 
@@ -23,10 +24,9 @@ function VideoSlider() {
         },
     );
     const {startCountdown, resetCountdown, stopCountdown, setIsShow} = countdownStore(state => state);
-    const [videoList] = useState<SourceType[]>([...videoDataList]);
+    const [videoList, setVideoList] = useState<SourceType[]>([...videoDataList]);
     const [isBrowserFocus, setIsBrowserFocus] = useState(true);
     const countRef = countdownStore(state => state.countRef);
-
 
     // endregion
 
@@ -37,7 +37,7 @@ function VideoSlider() {
         setIsShow(false);
         setTimeout(() => {
             resetCountdown();
-        }, 500)
+        }, 1000);
     }, [setIsShow, resetCountdown]);
 
     const onPrev = useCallback(() => {
@@ -50,6 +50,9 @@ function VideoSlider() {
         clearNextPreviewer();
     }, [clearNextPreviewer]);
 
+    // const onStop = useCallback(() => {
+    // }, [])
+
     const onPlayEndAfterAction = useCallback(() => {
         startCountdown();
     }, [startCountdown]);
@@ -61,6 +64,15 @@ function VideoSlider() {
     const initializeBrowserFocus = useCallback(() => {
         setIsBrowserFocus(document.hasFocus());
     }, []);
+
+    // 시청완료 처리
+    const onUpdateVideoView = useCallback((idx: number) => {
+        setVideoList(prev => (
+            prev.map((item, index) => (
+                idx === index ? {...item, isView: true} : item
+            ))
+        ));
+    }, [currentSlideIndex]);
 
     // endregion
 
@@ -82,10 +94,11 @@ function VideoSlider() {
         videoList.map((videoData, idx) => (
             <div key={videoData.src} className="keen-slider__slide">
                 <VideoPlayer idx={idx} isSelected={idx === currentSlideIndex} isBrowserFocus={isBrowserFocus}
-                             source={videoData} onPlayEndAfterAction={onPlayEndAfterAction}/>
+                             source={videoData} onPlayEndAfterAction={onPlayEndAfterAction}
+                             updateAction={onUpdateVideoView}/>
             </div>
         ))
-    ), [videoList, currentSlideIndex, isBrowserFocus]);
+    ), [videoList, currentSlideIndex, isBrowserFocus, onUpdateVideoView]);
 
     // Initialize Browser Event
     useEffect(() => {
@@ -125,6 +138,7 @@ function VideoSlider() {
             </div>
             <div className={'slider-control__wrapper'}>
                 <button onClick={onPrev}>⬅️</button>
+                {/* <button onClick={onStop}>⏹️</button> */}
                 <button onClick={onNext}>➡️</button>
             </div>
 

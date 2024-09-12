@@ -1,9 +1,8 @@
 import {create} from 'zustand';
 import Countdown from 'react-countdown';
-import {CountdownRefType} from '@/components/Countdown';
 
 interface CountStoreType {
-    countRef: CountdownRefType;
+    countRef: Countdown | null;
     isShow: boolean;
     setIsShow: (isShow: boolean) => void;
     initializeCountdown: (ref: Countdown) => void;

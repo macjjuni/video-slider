@@ -14,6 +14,7 @@
     "react": "^18",
     "react-countdown": "^2.3.6",
     "react-dom": "^18",
+    "sass": "^1.78.0",
     "video.js": "^8.17.3",
     "zustand": "^4.5.5"
   },
@@ -24,5 +25,6 @@
     "eslint": "^8",
     "eslint-config-next": "14.2.8",
     "typescript": "^5"
-  }
+  },
+  "packageManager": "yarn@1.22.22+sha1.ac34549e6aa8e7ead463a7407e1c7390f61a6610"
 }

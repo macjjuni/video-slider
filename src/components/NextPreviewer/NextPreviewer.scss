@@ -8,34 +8,40 @@
     justify-content: center;
     align-items: center;
     font-size: 18px;
-    width: 164px;
-    height: 96px;
+    width: 180px;
+    height: 40px;
     background: rgba(0,0,0,0.4);
     border-radius: 12px;
     opacity: 0;
     transition: 0.3s ease opacity;
     z-index: 999;
+
+
+    &.next-previewer__wrapper--show {
+        opacity: 1;
+    }
+    &.next-previewer__wrapper--hide {
+        opacity: 0;
+    }
+
+    .next-previewer__wrapper__countdown {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: absolute;
+        top: -38px; right: 6px;
+        width: 32px;
+        height: 32px;
+        font-size: 16px;
+        color: #fff;
+        background-color: rgba(0,0,0,0.4);
+        border-radius: 50%;
+        overflow: hidden;
+    }
+
+    .next-previewer__content {
+        font-size: 16px;
+        color: #fff;
+    }
 }
 
-.next-previewer__wrapper--show {
-    opacity: 1;
-}
-.next-previewer__wrapper--hide {
-    opacity: 0;
-}
-
-.next-previewer__wrapper__countdown {
-    position: absolute;
-    top: 0; left: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 32px;
-    height: 32px;
-    color: #fff;
-}
-
-.next-previewer__content {
-    font-size: 16px;
-    color: #fff;
-}

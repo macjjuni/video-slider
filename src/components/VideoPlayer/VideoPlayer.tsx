@@ -1,14 +1,18 @@
+'use client';
+
 import {memo, useCallback, useEffect, useRef, useState} from 'react';
 import videojs from 'video.js';
 import Player from 'video.js/dist/types/player';
 import 'video.js/dist/video-js.css';
-import './index.css';
+import './VideoPlayer.scss';
 
 type PlayerOption = typeof videojs.options;
 
 export interface SourceType {
+    id: string;
     src: string;
     type: string;
+    isView: boolean;
 }
 
 interface VideoPlayerType {
@@ -17,6 +21,7 @@ interface VideoPlayerType {
     source: SourceType;
     onPlayEndAfterAction: () => void;
     isBrowserFocus: boolean;
+    updateAction: (idx: number) => void;
 }
 
 
@@ -24,7 +29,9 @@ const mathFloor = (num: number) => {
     return Math.floor(num);
 };
 
-function VideoPlayer({idx, isSelected, source, onPlayEndAfterAction, isBrowserFocus}: VideoPlayerType) {
+function VideoPlayer({idx, isSelected, source, onPlayEndAfterAction, isBrowserFocus, updateAction}: VideoPlayerType) {
+
+    // region [Hooks]
 
     const [isLoaded, setIsLoaded] = useState(false);
     const isEnd = useRef<boolean>(false);
@@ -32,6 +39,8 @@ function VideoPlayer({idx, isSelected, source, onPlayEndAfterAction, isBrowserFo
     const playerRef = useRef<Player | null>(null);
     const totalTime = useRef<number>(0);
     const [playTime, setPlayTime] = useState<number | null>(null);
+
+    // endregion
 
 
     // region [Events]
@@ -52,6 +61,7 @@ function VideoPlayer({idx, isSelected, source, onPlayEndAfterAction, isBrowserFo
 
     const onVideoEndEvent = useCallback(() => {
         onSetIsEnd(true);
+        updateAction(idx);
         setTimeout(() => {
             onPlayEndAfterAction?.();
         }, 1000);
@@ -194,7 +204,14 @@ function VideoPlayer({idx, isSelected, source, onPlayEndAfterAction, isBrowserFo
 
     return (
         <div ref={videoRef} className={'video-player__wrapper'}>
-            <div className={'video-player__wrapper__time'}>{playTime}</div>
+            {
+                playTime !== null && (
+                    <div className={'video-player__wrapper__time'}>
+                        <span>{playTime}</span>
+                    </div>
+                )
+            }
+            <div className={'video-player__isView'}>{!source.isView ? '미시청' : '시청완료' }</div>
         </div>
     );
 }
