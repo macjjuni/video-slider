@@ -21,7 +21,7 @@ interface VideoPlayerType {
     source: SourceType;
     onPlayEndAfterAction: () => void;
     isBrowserFocus: boolean;
-    updateAction: (idx: number) => void;
+    updateAction: (idx: string) => void;
 }
 
 
@@ -61,11 +61,11 @@ function VideoPlayer({idx, isSelected, source, onPlayEndAfterAction, isBrowserFo
 
     const onVideoEndEvent = useCallback(() => {
         onSetIsEnd(true);
-        updateAction(idx);
+        updateAction(source.id);
         setTimeout(() => {
             onPlayEndAfterAction?.();
         }, 1000);
-    }, []);
+    }, [source]);
 
 
     const onVideoTimeUpdate = useCallback(() => {

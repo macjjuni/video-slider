@@ -2,7 +2,6 @@
 
 import {useKeenSlider} from 'keen-slider/react';
 import {useCallback, useEffect, useMemo, useState, memo} from 'react';
-import videoDataList from '@/data.ts';
 import {VideoPlayer} from '@/components/index.ts';
 import type {SourceType} from '@/components/VideoPlayer/VideoPlayer.tsx';
 import NextPreviewer from '@/components/NextPreviewer/NextPreviewer.tsx';
@@ -11,7 +10,7 @@ import './VideoSlider.scss';
 import 'keen-slider/keen-slider.min.css';
 
 
-function VideoSlider() {
+function VideoSlider({list}: { list: SourceType[] }) {
 
     // region [Hooks]
 
@@ -24,9 +23,27 @@ function VideoSlider() {
         },
     );
     const {startCountdown, resetCountdown, stopCountdown, setIsShow} = countdownStore(state => state);
-    const [videoList, setVideoList] = useState<SourceType[]>([...videoDataList]);
+    const [videoList, setVideoList] = useState<SourceType[]>([...list]);
     const [isBrowserFocus, setIsBrowserFocus] = useState(true);
     const countRef = countdownStore(state => state.countRef);
+
+    // endregion
+
+
+    // region [Transactions]
+
+    const updateVideoViewHistory = useCallback(async(id: string) => {
+        try {
+            const {data: videoList} = await fetch('http://localhost:3000/api/video-list', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ data: id }),
+            }).then(res => res.json());
+            setVideoList([...videoList]);
+        } catch (err) {
+            console.error(err);
+        }
+    }, []);
 
     // endregion
 
@@ -66,13 +83,9 @@ function VideoSlider() {
     }, []);
 
     // 시청완료 처리
-    const onUpdateVideoView = useCallback((idx: number) => {
-        setVideoList(prev => (
-            prev.map((item, index) => (
-                idx === index ? {...item, isView: true} : item
-            ))
-        ));
-    }, [currentSlideIndex]);
+    const onUpdateVideoView = useCallback((idx: string) => {
+        updateVideoViewHistory(idx).then();
+    }, []);
 
     // endregion
 
@@ -141,7 +154,6 @@ function VideoSlider() {
                 {/* <button onClick={onStop}>⏹️</button> */}
                 <button onClick={onNext}>➡️</button>
             </div>
-
         </div>
     );
 }
