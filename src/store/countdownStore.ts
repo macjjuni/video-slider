@@ -3,8 +3,6 @@ import Countdown from 'react-countdown';
 
 interface CountStoreType {
     countRef: Countdown | null;
-    isShow: boolean;
-    setIsShow: (isShow: boolean) => void;
     initializeCountdown: (ref: Countdown) => void;
     countSec: number;
     setCountSet: (countSec: number) => void;
@@ -17,8 +15,6 @@ const defaultCountSec = 5;
 
 const countdownStore = create<CountStoreType>((set) => ({
     countRef: null,
-    isShow: false,
-    setIsShow: (isShow) => set((state) => ({...state, isShow})),
     initializeCountdown: (countRef: Countdown) => set((state) => ({...state, countRef})),
     countSec: defaultCountSec,
     setCountSet: (countSec: number) => set(() => ({countSec})),

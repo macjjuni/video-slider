@@ -5,6 +5,8 @@ import videojs from 'video.js';
 import Player from 'video.js/dist/types/player';
 import 'video.js/dist/video-js.css';
 import './VideoPlayer.scss';
+import CountdownText, {CountdownTextRefs} from "@/components/VideoPlayer/components/CountdownText.tsx";
+import {videoStore} from "@/store";
 
 type PlayerOption = typeof videojs.options;
 
@@ -34,11 +36,21 @@ function VideoPlayer({idx, isSelected, source, onPlayEndAfterAction, isBrowserFo
     // region [Hooks]
 
     const [isLoaded, setIsLoaded] = useState(false);
-    const isEnd = useRef<boolean>(false);
+    const isEnd = useRef<boolean>(false); // 종료 여부
     const videoRef = useRef<HTMLDivElement | null>(null);
     const playerRef = useRef<Player | null>(null);
     const totalTime = useRef<number>(0);
-    const [playTime, setPlayTime] = useState<number | null>(null);
+    const countdownTextRef = useRef<CountdownTextRefs>(null);
+    const initializePlayerRef = videoStore(state => state.initializePlayerRef);
+
+    // endregion
+
+
+    // region [CountdownText]
+
+    const setCountdownText = useCallback((time: number | null) => {
+        countdownTextRef.current?.setPlaytime(time);
+    }, []);
 
     // endregion
 
@@ -49,15 +61,16 @@ function VideoPlayer({idx, isSelected, source, onPlayEndAfterAction, isBrowserFo
         const player = playerRef.current as Player;
         totalTime.current = mathFloor(player?.duration() || 0);
         setIsLoaded(true);
-    }, [isSelected]);
+    }, []);
 
     const onVideoPlayEvent = useCallback(() => {
-        console.log(`%con Play aciton. --> ${idx}`, 'background-color: red; color: white; padding: 4px;');
+        onSetIsEnd(false);
+        console.log(`%con Play action. --> ${idx}`, 'background-color: red; color: white; padding: 4px;');
     }, [idx]);
 
     const onVideoStopEvent = useCallback(() => {
-        console.log(`%con Stop aciton. --> ${idx}`, 'background-color: blue; color: white; padding: 4px;');
-    }, []);
+        console.log(`%con Stop action. --> ${idx}`, 'background-color: blue; color: white; padding: 4px;');
+    }, [idx]);
 
     const onVideoEndEvent = useCallback(() => {
         onSetIsEnd(true);
@@ -65,8 +78,7 @@ function VideoPlayer({idx, isSelected, source, onPlayEndAfterAction, isBrowserFo
         setTimeout(() => {
             onPlayEndAfterAction?.();
         }, 1000);
-    }, [source]);
-
+    }, [updateAction, source, onPlayEndAfterAction]);
 
     const onVideoTimeUpdate = useCallback(() => {
 
@@ -74,12 +86,8 @@ function VideoPlayer({idx, isSelected, source, onPlayEndAfterAction, isBrowserFo
 
         const currentTime = mathFloor(player?.currentTime() || 0);
         const diffTime = totalTime.current - currentTime;
-
-        // 렌더링 최적화(값이 같으면 업데이트 안함)
-        if (playTime === diffTime) { return; }
-
-        setPlayTime(diffTime);
-    }, [playTime]);
+        setCountdownText(diffTime);
+    }, [setCountdownText]);
 
     // endregion
 
@@ -106,7 +114,6 @@ function VideoPlayer({idx, isSelected, source, onPlayEndAfterAction, isBrowserFo
         const videoElement = document.createElement('video-js');
         videoRef.current!.appendChild(videoElement);
 
-
         playerRef.current = videojs(videoElement, {
             ...getOptions(),
             sources: [{...source}],
@@ -115,7 +122,6 @@ function VideoPlayer({idx, isSelected, source, onPlayEndAfterAction, isBrowserFo
         if (!playerRef.current) {
             throw Error('Invalid playerRef.current');
         }
-
         initializeVideoPlayerEvent(playerRef.current as Player);
     }, [source, initializeVideoPlayerEvent]);
 
@@ -129,10 +135,10 @@ function VideoPlayer({idx, isSelected, source, onPlayEndAfterAction, isBrowserFo
     }, []);
 
     const clearState = useCallback(() => {
-        setPlayTime(null);
-    }, []);
+        setCountdownText(null);
+    }, [setCountdownText]);
 
-    const onStartVideoPlayer = useCallback(() => {
+    const onPlayVideoPlayer = useCallback(() => {
         if (!document.hasFocus()) { return; }
 
         const player = playerRef.current as Player;
@@ -149,6 +155,7 @@ function VideoPlayer({idx, isSelected, source, onPlayEndAfterAction, isBrowserFo
         isEnd.current = bool;
     }, []);
 
+
     // endregion
 
 
@@ -157,11 +164,16 @@ function VideoPlayer({idx, isSelected, source, onPlayEndAfterAction, isBrowserFo
     useEffect(() => {
         const isReady = playerRef?.current?.isReady_;
 
-        if (isSelected) { onSetIsEnd(false); }
+        if (isSelected) {
+            if (playerRef?.current) {
+                initializePlayerRef(playerRef.current)
+            }
+            onSetIsEnd(false);
+        }
 
         // 플레이 상태이고 이미 플레이어가 준비된 상태인 경우
         if (isSelected && isLoaded && isReady) {
-            onStartVideoPlayer();
+            onPlayVideoPlayer();
             return;
         }
         // 플레이 상태이고 플레이어가 없는 경우
@@ -186,11 +198,10 @@ function VideoPlayer({idx, isSelected, source, onPlayEndAfterAction, isBrowserFo
         }
         // 플레이 상태이고 브라우저가 focus 상태인 경우
         if (isBrowserFocus && isSelected && !isEnd.current) {
-            onStartVideoPlayer();
+            onPlayVideoPlayer();
             return;
         }
     }, [isBrowserFocus]);
-
 
     useEffect(() => {
         // Clean up
@@ -204,13 +215,7 @@ function VideoPlayer({idx, isSelected, source, onPlayEndAfterAction, isBrowserFo
 
     return (
         <div ref={videoRef} className={'video-player__wrapper'}>
-            {
-                playTime !== null && (
-                    <div className={'video-player__wrapper__time'}>
-                        <span>{playTime}</span>
-                    </div>
-                )
-            }
+            <CountdownText ref={countdownTextRef} />
             <div className={'video-player__isView'}>{!source.isView ? '미시청' : '시청완료' }</div>
         </div>
     );

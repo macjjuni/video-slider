@@ -1,11 +1,12 @@
 'use client';
 
-import {useKeenSlider} from 'keen-slider/react';
-import {useCallback, useEffect, useMemo, useState, memo} from 'react';
-import {VideoPlayer} from '@/components/index.ts';
+import {KeenSliderHooks, KeenSliderInstance, useKeenSlider} from 'keen-slider/react';
+import {useCallback, useEffect, useMemo, useState, memo, MutableRefObject} from 'react';
+import {VideoPlayer, Controller} from '@/components/index.ts';
 import type {SourceType} from '@/components/VideoPlayer/VideoPlayer.tsx';
 import NextPreviewer from '@/components/NextPreviewer/NextPreviewer.tsx';
 import countdownStore from '@/store/countdownStore.ts';
+import { sliderStore } from "@/store";
 import './VideoSlider.scss';
 import 'keen-slider/keen-slider.min.css';
 
@@ -14,7 +15,7 @@ function VideoSlider({list}: { list: SourceType[] }) {
 
     // region [Hooks]
 
-    const [currentSlideIndex, setCurrentSlideIndex] = useState<number>(0);
+    const {currentSlideIndex, setCurrentSlideIndex} = sliderStore(state => state);
     const [sliderRef, instanceRef] = useKeenSlider(
         {
             slideChanged(e) {
@@ -22,7 +23,9 @@ function VideoSlider({list}: { list: SourceType[] }) {
             },
         },
     );
-    const {startCountdown, resetCountdown, stopCountdown, setIsShow} = countdownStore(state => state);
+    const initializeSliderRef = sliderStore(state => state.initializeSliderRef);
+    const onNext = sliderStore(state => state.onNext);
+    const {startCountdown, stopCountdown} = countdownStore(state => state);
     const [videoList, setVideoList] = useState<SourceType[]>([...list]);
     const [isBrowserFocus, setIsBrowserFocus] = useState(true);
     const countRef = countdownStore(state => state.countRef);
@@ -50,26 +53,6 @@ function VideoSlider({list}: { list: SourceType[] }) {
 
     // region [Privates]
 
-    const clearNextPreviewer = useCallback(() => {
-        setIsShow(false);
-        setTimeout(() => {
-            resetCountdown();
-        }, 1000);
-    }, [setIsShow, resetCountdown]);
-
-    const onPrev = useCallback(() => {
-        instanceRef.current?.prev();
-        clearNextPreviewer();
-    }, [clearNextPreviewer]);
-
-    const onNext = useCallback(() => {
-        instanceRef.current?.next();
-        clearNextPreviewer();
-    }, [clearNextPreviewer]);
-
-    // const onStop = useCallback(() => {
-    // }, [])
-
     const onPlayEndAfterAction = useCallback(() => {
         startCountdown();
     }, [startCountdown]);
@@ -85,7 +68,7 @@ function VideoSlider({list}: { list: SourceType[] }) {
     // 시청완료 처리
     const onUpdateVideoView = useCallback((idx: string) => {
         updateVideoViewHistory(idx).then();
-    }, []);
+    }, [updateVideoViewHistory]);
 
     // endregion
 
@@ -103,6 +86,8 @@ function VideoSlider({list}: { list: SourceType[] }) {
     // endregion
 
 
+    // region [Templates]
+
     const sanitizedVideoList = useMemo(() => (
         videoList.map((videoData, idx) => (
             <div key={videoData.src} className="keen-slider__slide">
@@ -111,7 +96,16 @@ function VideoSlider({list}: { list: SourceType[] }) {
                              updateAction={onUpdateVideoView}/>
             </div>
         ))
-    ), [videoList, currentSlideIndex, isBrowserFocus, onUpdateVideoView]);
+    ), [videoList, currentSlideIndex, isBrowserFocus, onPlayEndAfterAction, onUpdateVideoView]);
+
+    // endregion
+
+
+    // region [Life Cycles]
+
+    useEffect(() => {
+        initializeSliderRef(instanceRef as MutableRefObject<KeenSliderInstance<KeenSliderHooks>>);
+    }, [initializeSliderRef, instanceRef]);
 
     // Initialize Browser Event
     useEffect(() => {
@@ -141,6 +135,8 @@ function VideoSlider({list}: { list: SourceType[] }) {
     }, [isBrowserFocus]);
 
 
+    // endregion
+
     return (
         <div>
             <div className="slider__wrapper">
@@ -149,11 +145,7 @@ function VideoSlider({list}: { list: SourceType[] }) {
                 </div>
                 <NextPreviewer nextAction={onCountdownEndAfterAction}/>
             </div>
-            <div className={'slider-control__wrapper'}>
-                <button onClick={onPrev}>⬅️</button>
-                {/* <button onClick={onStop}>⏹️</button> */}
-                <button onClick={onNext}>➡️</button>
-            </div>
+            <Controller />
         </div>
     );
 }

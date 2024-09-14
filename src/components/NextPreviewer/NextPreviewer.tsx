@@ -1,7 +1,7 @@
 'use client';
 
 import Countdown from 'react-countdown';
-import {memo, useCallback, useEffect, useRef} from 'react';
+import {memo, useCallback, useRef} from 'react';
 import {countdownStore} from '../../store';
 import './NextPreviewer.scss';
 
@@ -17,10 +17,7 @@ function NextPreviewer({nextAction}: NextPreviewerProps) {
 
     const countContainerRef = useRef<HTMLDivElement | null>(null);
     const initializeCountdown = countdownStore(state => state.initializeCountdown);
-    const resetCountdown = countdownStore(state => state.resetCountdown);
     const countSec = countdownStore(state => state.countSec);
-    const isShow = countdownStore(state => state.isShow);
-    const setIsShow = countdownStore(state => state.setIsShow);
 
     // endregion
 
@@ -41,41 +38,24 @@ function NextPreviewer({nextAction}: NextPreviewerProps) {
     // region [Events]
 
     const onStart = useCallback(() => {
-        setIsShow(true);
-    }, []);
+        onContainerShow();
+    }, [onContainerShow]);
 
     const onStop = useCallback(() => {
         console.log('onStop');
     }, []);
 
     const onReset = useCallback(() => {
+        onContainerHide();
         console.log('onReset');
-    }, []);
+    }, [onContainerHide]);
 
     const onComplete = useCallback(() => {
-
         setTimeout(() => {
-            setIsShow(false);
-        }, 1000)
-
-        setTimeout(() => {
-            nextAction?.();
-        }, 1500);
-
-    }, [resetCountdown]);
-
-    // endregion
-
-
-    // region [Life Cycles]
-
-    useEffect(() => {
-        if (isShow) {
-            onContainerShow();
-        } else {
             onContainerHide();
-        }
-    }, [isShow]);
+            nextAction?.();
+        }, 800)
+    }, [onContainerHide, nextAction]);
 
     // endregion
 

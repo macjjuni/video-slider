@@ -1,4 +1,4 @@
-import './DefaultLayout.css';
+import './DefaultLayout.scss';
 
 export default function DefaultLayout({ children}: {children: React.ReactNode}) {
     return (
